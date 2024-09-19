@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Soziales Netzwerk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-form, .post-form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .posts {
+            margin-top: 20px;
+        }
+
+        .post {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+
+        .post h3 {
+            margin: 0;
+        }
+
+        .post p {
+            margin: 10px 0;
+        }
+
+        .post .date {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .edit-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: #007bff;
+        }
+
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        Willkommen in meinem sozialen Netzwerk
+    </header>
+
+    <div class="container">
+        <!-- Login / Registrierung -->
+        <div class="login-form">
+            <h2>Login</h2>
+            <label for="username">Benutzername:</label>
+            <input type="text" id="username" placeholder="Benutzername eingeben">
+            
+            <button onclick="login()">Anmelden</button>
+        </div>
+
+        <!-- Beitragsformular -->
+        <div class="post-form" style="display: none;">
+            <h2>Neuen Beitrag erstellen</h2>
+            <label for="postContent">Dein Beitrag:</label>
+            <textarea id="postContent" rows="4" placeholder="Schreibe etwas..."></textarea>
+            <button onclick="createPost()">Posten</button>
+        </div>
+
+        <!-- Posts-Anzeige -->
+        <div class="posts">
+            <h2>Beiträge</h2>
+            <div id="postList"></div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 unser Soziales Übergabe Netzwerk
+    </footer>
+
+    <script>
+        const postList = document.getElementById('postList');
+        const postForm = document.querySelector('.post-form');
+        let posts = [];
+        let editIndex = null;
+
+        // Lade die gespeicherten Beiträge aus dem localStorage beim Laden der Seite
+        window.onload = function() {
+            if (localStorage.getItem('posts')) {
+                posts = JSON.parse(localStorage.getItem('posts'));
+                renderPosts();
+            }
+        };
+
+        function login() {
+            const username = document.getElementById('username').value;
+
+            if (username) {
+                alert('Willkommen ' + username + '!');
+                document.querySelector('.login-form').style.display = 'none';
+                postForm.style.display = 'block';
+                localStorage.setItem('username', username); // Speichere den Benutzernamen
+            } else {
+                alert('Bitte einen Benutzernamen eingeben');
+            }
+        }
+
+        function createPost() {
+            const content = document.getElementById('postContent').value;
+
+            if (content) {
+                const post = {
+                    username: localStorage.getItem('username'),
+                    content: content,
+                    date: new Date().toLocaleString() // Speichere Datum und Uhrzeit
+                };
+
+                if (editIndex !== null) {
+                    posts[editIndex] = post; // Bearbeiteter Post
+                    editIndex = null;
+                } else {
+                    posts.push(post); // Neuer Post
+                }
+
+                localStorage.setItem('posts', JSON.stringify(posts)); // Speichere Beiträge im localStorage
+                renderPosts();
+                document.getElementById('postContent').value = ''; // Feld leeren
+            } else {
+                alert('Bitte einen Beitrag eingeben');
+            }
+        }
+
+        function renderPosts() {
+            postList.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postElement = document.createElement('div');
+                postElement.classList.add('post');
+                postElement.innerHTML = `
+                    <h3>${post.username}</h3>
+                    <p>${post.content}</p>
+                    <p class="date">${post.date}</p>
+                    <button class="edit-btn" onclick="editPost(${index})">Bearbeiten</button>
+                `;
+                postList.appendChild(postElement);
+            });
+        }
+
+        function editPost(index) {
+            const post = posts[index];
+            document.getElementById('postContent').value = post.content;
+            editIndex = index; // Speichere den Index des Posts, der bearbeitet wird
+            window.scrollTo(0, 0); // Scrolle nach oben zum Bearbeitungsfeld
+        }
+    </script>
+
+</body>
+</html>
